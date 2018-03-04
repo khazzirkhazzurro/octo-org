@@ -20,29 +20,28 @@ octokit.authenticate({
 const file = join(__dirname, 'repositories.json')
 
 if (!fs.existsSync(file)) {
-  Promise.all([
-    octokit.repos.getForOrg({
+
+  const getForOrg = async (page) => {
+    return octokit.repos.getForOrg({
       org: OGANIZATION,
       type: REPO_TYPE,
-      page: 1,
-      per_page: 100
-    }),
-    octokit.repos.getForOrg({
-      org: OGANIZATION,
-      type: REPO_TYPE,
-      page: 2,
+      page: page,
       per_page: 100
     })
-  ]).then(res => {
-    let data = []
-    res.map(item => {
-      // console.log(item.data.length)
-      data.push(...item.data)
-    })
-    // console.log(data)
+  }
+
+  (async () => {
+    let page = 1
+    const data = []
+
+    const page1 = await getForOrg(page)
+    const page2 = await getForOrg(++page)
+    data.push(...page1.data)
+    data.push(...page2.data)
+
     fs.writeFileSync(file, JSON.stringify(data, null, 2))
     spinner.succeed('Completed')
-  })
+  })()
 }
 
 // fetch language details of one repo
