@@ -43,7 +43,7 @@ if (!hasFile()) {
     spinner.succeed('Completed')
   })()
 } else {
-  console.log('You have a repositories.json file')
+  console.log('\nYou have a repositories.json file')
   spinner.stop()
 }
 

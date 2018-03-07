@@ -1,6 +1,7 @@
 const octokit = require('@octokit/rest')()
 const ora = require('ora')
 const login = require('./login')
+const { save } = require('./store')
 
 let { AUTHENTICATION_TYPE, TOKEN, OGANIZATION, REPO_TYPE } = process.env
 const spinner = ora(`Loading language details of each repository`).start()
@@ -30,10 +31,12 @@ try {
   `))
 }
 
-_raw = raw.slice(0,3)
+_raw = raw.slice(0, raw.length)
 
+let count = 0;
 const fetch = (repo) => {
-  spinner.text = `Fetching... ${repo.full_name}`
+  count++
+  spinner.text = `Fetching... ${count}/${raw.length} ${repo.full_name}`
 
   octokit.repos.getLanguages({
     owner: OGANIZATION,
@@ -45,6 +48,7 @@ const fetch = (repo) => {
     _repo && fetch(_repo)
 
     if (!_repo) {
+      save(JSON.stringify(raw, null, 2))
       spinner.succeed(`Total ${raw.length} repositories fetched 🤗`)
     }
   })
