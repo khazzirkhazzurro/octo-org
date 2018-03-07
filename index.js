@@ -1,8 +1,7 @@
 const octokit = require('@octokit/rest')()
-const login = require('./login')
-const fs = require('fs')
-const { join } = require('path')
 const ora = require('ora')
+const login = require('./login')
+const { save, hasFile } = require('./store')
 
 let { AUTHENTICATION_TYPE, TOKEN, OGANIZATION, REPO_TYPE } = process.env
 const spinner = ora(`Loading Github ${OGANIZATION} Oganization Data`).start()
@@ -17,9 +16,9 @@ octokit.authenticate({
 })
 
 // FIXME: need to two-factor otp
-const file = join(__dirname, 'repositories.json')
+// const file = join(__dirname, 'repositories.json')
 
-if (!fs.existsSync(file)) {
+if (!hasFile()) {
 
   const getForOrg = async (page) => {
     return octokit.repos.getForOrg({
@@ -39,9 +38,13 @@ if (!fs.existsSync(file)) {
     data.push(...page1.data)
     data.push(...page2.data)
 
-    fs.writeFileSync(file, JSON.stringify(data, null, 2))
+    // fs.writeFileSync(file, JSON.stringify(data, null, 2))
+    save(JSON.stringify(data, null, 2))
     spinner.succeed('Completed')
   })()
+} else {
+  console.log('You have a repositories.json file')
+  spinner.stop()
 }
 
 // fetch language details of one repo
