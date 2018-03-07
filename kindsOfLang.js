@@ -2,6 +2,11 @@ const { table } = require('table')
 const chalk = require('chalk')
 const bytes = require('pretty-bytes')
 
+const precisionRound = (number, precision) => {
+  const factor = Math.pow(10, precision)
+  return Math.round(number * factor) / factor
+}
+
 let raw
 try {
   raw = require('./repositories.json')
@@ -17,21 +22,41 @@ try {
 }
 
 const data = []
+const data2 = []
 const config = {}
 const langs = {}
 
 raw.map(repo => {
   // langs.push(repo.language)
-  const { name, language, size } = repo
+  const { name, language, languages, size } = repo
   if (langs.hasOwnProperty(language)) {
     langs[language] += 1
   } else {
     langs[language] = 1
   }
 
+  const languageTypes = Object.keys(languages)
+  let languageEntries = Object.entries(languages)
+  languageEntries = languageEntries.map(item => {
+    const rate = precisionRound(item[1] / size * 100, 2)
+    return `${item[0]} ${rate}%`
+  })
   data.push([
-    name, language, bytes(size)
+    name, language, bytes(size), languageTypes.length, languageTypes.join(',')
   ])
+
+  const initCell = [name, languageTypes.length].concat(languageEntries)
+  initCell.length = 12
+  initCell[11] = bytes(size)
+  data2.push(initCell)
+})
+
+data.sort((a, b) => {
+  return b[3] - a[3]
+})
+
+data2.sort((a, b) => {
+  return b[1] - a[1]
 })
 
 delete langs.null
@@ -59,4 +84,5 @@ langTable.map((lang, i) => {
 // data.push(['', uniqLangs.length, ''])
 
 console.log(table(data, config))
+console.log(table(data2, config))
 console.log(table(langTable, config))

@@ -45,6 +45,7 @@ const fetch = (repo) => {
   .then(result => {
     const _repo = _raw.shift()
     repo.languages = result.data
+    repo.size = Object.entries(result.data).reduce((a, b) => a + b[1], 0)
     _repo && fetch(_repo)
 
     if (!_repo) {
