@@ -1,7 +1,7 @@
 const octokit = require('@octokit/rest')()
 const login = require('./login')
 const fs = require('fs')
-const {join} = require('path')
+const { join } = require('path')
 const ora = require('ora')
 
 let { AUTHENTICATION_TYPE, TOKEN, OGANIZATION, REPO_TYPE } = process.env
